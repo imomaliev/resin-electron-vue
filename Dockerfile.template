@@ -1,0 +1,65 @@
+FROM resin/%%RESIN_MACHINE_NAME%%-node:6
+# FROM resin/raspberrypi3-node:6
+
+# Install other apt deps
+RUN apt-get update && apt-get install -y \
+  apt-utils \
+  clang \
+  xserver-xorg-core \
+  xserver-xorg-input-all \
+  xserver-xorg-video-fbdev \
+  xorg \
+  libdbus-1-dev \
+  libgtk2.0-dev \
+  libnotify-dev \
+  libgnome-keyring-dev \
+  libgconf2-dev \
+  libasound2-dev \
+  libcap-dev \
+  libcups2-dev \
+  libxtst-dev \
+  libxss1 \
+  libnss3-dev \
+  fluxbox \
+  libsmbclient \
+  libssh-4 \
+  fbset \
+  libexpat-dev && rm -rf /var/lib/apt/lists/*
+
+# Set Xorg and FLUXBOX preferences
+RUN mkdir ~/.fluxbox
+RUN echo "xset s off" > ~/.fluxbox/startup && echo "xserver-command=X -s 0 dpms" >> ~/.fluxbox/startup
+RUN echo "#!/bin/bash" > /etc/X11/xinit/xserverrc \
+  && echo "" >> /etc/X11/xinit/xserverrc \
+  && echo 'exec /usr/bin/X -s 0 dpms -nocursor -nolisten tcp "$@"' >> /etc/X11/xinit/xserverrc
+
+RUN npm install --unsafe-perm -g yarn
+
+# Move to app dir
+WORKDIR /usr/src/app
+
+COPY ./package.json ./
+COPY ./yarn.lock ./
+
+# Install yarn modules for the application
+RUN yarn install --unsafe-perm
+
+COPY ./.eslintrc.js ./
+COPY ./.electron-vue ./.electron-vue
+COPY ./src ./src
+COPY ./static ./static
+
+RUN yarn run pack
+RUN rm -rf src/ static/ .electron-vue/ eslintrc.js
+
+# Install yarn modules for the application
+RUN yarn install --unsafe-perm --production --prefer-offline \
+	&& yarn cache clean && node_modules/.bin/electron-rebuild
+
+COPY ./docker/start.sh ./start.sh
+
+## uncomment if you want systemd
+ENV INITSYSTEM on
+
+# Start app
+CMD ["bash", "/usr/src/app/start.sh"]
