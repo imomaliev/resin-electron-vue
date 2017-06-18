@@ -1,7 +1,7 @@
 {
   "name": "resin-electron-vue",
   "productName": "resin-electron-vue",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "author": "Sardorbek Imomaliev",
   "description": "An electron-vue project",
   "license": "MIT",
@@ -15,12 +15,16 @@
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
     "build:web": "cross-env BUILD_TARGET=web node .electron-vue/build.js",
     "dev": "node .electron-vue/dev-runner.js",
-    "lint": "eslint --ext .js,.vue -f ./node_modules/eslint-friendly-formatter src",
-    "lint:fix": "eslint --ext .js,.vue -f ./node_modules/eslint-friendly-formatter --fix src",
+    "e2e": "yarn run pack && mocha test/e2e",
+    "lint": "eslint --ext .js,.vue -f ./node_modules/eslint-friendly-formatter src test",
+    "lint:fix": "eslint --ext .js,.vue -f ./node_modules/eslint-friendly-formatter --fix src test",
     "pack": "yarn run pack:main && yarn run pack:renderer",
     "pack:main": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.main.config.js",
     "pack:renderer": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.renderer.config.js",
-    "start": "NODE_ENV=production ./node_modules/.bin/electron ."
+    "start": "NODE_ENV=production ./node_modules/.bin/electron .",
+    "test": "yarn run unit && yarn run e2e",
+    "unit": "karma start test/unit/karma.conf.js",
+    "postinstall": "yarn run lint:fix"
   },
   "dependencies": {
     "axios": "^0.16.1",
@@ -28,18 +32,21 @@
     "electron-rebuild": "^1.5.11",
     "vue": "^2.3.3",
     "vue-electron": "^1.0.6",
-    "vue-router": "^2.5.3"
+    "vue-router": "^2.5.3",
+    "vuex": "^2.3.1"
   },
   "devDependencies": {
     "babel-core": "^6.22.1",
     "babel-eslint": "^7.0.0",
     "babel-loader": "^7.0.0",
+    "babel-plugin-istanbul": "^4.1.1",
     "babel-plugin-transform-runtime": "^6.22.0",
     "babel-preset-env": "^1.3.3",
     "babel-preset-stage-0": "^6.5.0",
     "babel-register": "^6.2.0",
     "babili-webpack-plugin": "^0.1.1",
     "cfonts": "^1.1.3",
+    "chai": "^4.0.0",
     "chalk": "^1.1.3",
     "copy-webpack-plugin": "^4.0.1",
     "cross-env": "^5.0.0",
@@ -61,8 +68,20 @@
     "extract-text-webpack-plugin": "^2.0.0-beta.4",
     "file-loader": "^0.11.1",
     "html-webpack-plugin": "^2.16.1",
+    "inject-loader": "^3.0.0",
     "json-loader": "^0.5.4",
+    "karma": "^1.3.0",
+    "karma-chai": "^0.1.0",
+    "karma-coverage": "^1.1.1",
+    "karma-electron": "^5.1.1",
+    "karma-mocha": "^1.2.0",
+    "karma-sourcemap-loader": "^0.3.7",
+    "karma-spec-reporter": "^0.0.31",
+    "karma-webpack": "^2.0.1",
+    "mocha": "^3.0.2",
     "multispinner": "^0.2.1",
+    "require-dir": "^0.3.0",
+    "spectron": "^3.7.1",
     "style-loader": "^0.18.1",
     "url-loader": "^0.5.7",
     "vue-html-loader": "^1.2.2",
@@ -71,6 +90,7 @@
     "vue-template-compiler": "^2.3.3",
     "webpack": "^2.2.1",
     "webpack-dev-server": "^2.3.0",
-    "webpack-hot-middleware": "^2.18.0"
+    "webpack-hot-middleware": "^2.18.0",
+    "webpack-merge": "^4.1.0"
   }
 }
